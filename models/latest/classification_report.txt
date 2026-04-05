@@ -1,0 +1,11 @@
+                                                    precision    recall  f1-score   support
+
+                       Checking or savings account       0.86      0.93      0.89     15063
+Money transfer, virtual currency, or money service       0.88      0.78      0.83      8751
+                                          Mortgage       0.96      0.95      0.95      5485
+                                      Student loan       0.98      0.95      0.96      3684
+                             Vehicle loan or lease       0.93      0.92      0.92      3802
+
+                                          accuracy                           0.90     36785
+                                         macro avg       0.92      0.91      0.91     36785
+                                      weighted avg       0.90      0.90      0.90     36785
