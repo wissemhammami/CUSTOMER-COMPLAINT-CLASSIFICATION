@@ -1,20 +1,24 @@
-````markdown
 # Customer Complaint Classifier
 
-Automatically classifies consumer financial complaints into product categories using a Machine Learning pipeline built on the CFPB dataset.
+End-to-end NLP machine learning project that automatically classifies consumer financial complaints into product categories.
+Built with Logistic Regression, TF-IDF, FastAPI, and Streamlit.
 
-> **Live Demo:** [complaint-classifier-wissem.streamlit.app](https://complaint-classifier-wissem.streamlit.app)
+## Live Demo
+
+[Open the app](https://complaint-classifier-wissem.streamlit.app)
 
 ---
 
-## Overview
+## Problem Statement
 
-This project demonstrates an end-to-end NLP classification pipeline — from raw text ingestion to a deployed web application. Given a free-text consumer complaint, the system predicts which financial product category it belongs to.
+Financial regulators and companies receive thousands of consumer complaints daily.
+Manually routing each complaint to the right team is slow and error-prone.
+This project automatically classifies free-text complaints into product categories
+so they can be routed and prioritized instantly.
 
-- **Input:** Raw consumer complaint narrative
-- **Output:** Product category + confidence score
-- **Dataset:** CFPB Consumer Complaints (public dataset)
-- **Deployment:** Streamlit Cloud + FastAPI REST API
+**Dataset** : [CFPB Consumer Complaints — public dataset](https://www.consumerfinance.gov/data-research/consumer-complaints/)  
+**Target** : Multi-class classification — 5 financial product categories  
+**Dataset size** : 245,228 complaints after cleaning
 
 ---
 
@@ -25,8 +29,6 @@ This project demonstrates an end-to-end NLP classification pipeline — from raw
 | **Logistic Regression** | **0.8983** | **0.8971** |
 | Linear SVM | 0.8919 | — |
 | Multinomial Naive Bayes | 0.8313 | — |
-
-Champion model: **Logistic Regression** with TF-IDF (unigrams + bigrams, 50,000 features)
 
 ### Per-class performance (Test Set)
 
@@ -40,42 +42,20 @@ Champion model: **Logistic Regression** with TF-IDF (unigrams + bigrams, 50,000 
 
 ---
 
-## Dataset
-
-| Property | Value |
-|---|---|
-| Source | CFPB Consumer Complaints |
-| Raw rows | 476,303 |
-| After cleaning | 245,228 |
-| Features | Free-text complaint narrative |
-| Target | Product category (5 classes) |
-| Split | 70% train / 15% eval / 15% test |
-
-| Category | Count |
-|---|---|
-| Checking or savings account | 100,420 |
-| Money transfer / virtual currency | 58,335 |
-| Mortgage | 36,566 |
-| Vehicle loan or lease | 25,345 |
-| Student loan | 24,562 |
-
----
-
 ## Project Structure
-
 ```
 CUSTOMER_COMPLAINT_CLASSIFICATION/
 │
 ├── configs/
-│   ├── model.yaml               # Model hyperparameters
-│   └── training.yaml            # Training configuration
+│   ├── model.yaml                   # Model hyperparameters
+│   └── training.yaml                # Training configuration
 │
 ├── data/
-│   ├── raw/                     # Raw CSV (gitignored)
-│   └── processed/               # Cleaned splits (gitignored)
+│   ├── raw/                         # Raw CSV (gitignored)
+│   └── processed/                   # Cleaned splits (gitignored)
 │
 ├── models/
-│   └── latest/                  # Champion model served by API and Streamlit
+│   └── latest/                      # Champion model served by API and Streamlit
 │       ├── model.pkl
 │       ├── metrics.json
 │       ├── classification_report.txt
@@ -92,25 +72,25 @@ CUSTOMER_COMPLAINT_CLASSIFICATION/
 │
 ├── src/
 │   ├── data/
-│   │   ├── ingest.py            # Load and clean raw data
-│   │   └── validate.py          # Remove duplicates and short texts
+│   │   ├── ingest.py                # Load and clean raw data
+│   │   └── validate.py              # Remove duplicates and short texts
 │   ├── features/
-│   │   ├── transformers.py      # Custom sklearn TextCleaner transformer
-│   │   └── build.py             # Train/eval/test split and feature saving
+│   │   ├── transformers.py          # Custom sklearn TextCleaner transformer
+│   │   └── build.py                 # Train/eval/test split and feature saving
 │   ├── models/
-│   │   ├── train.py             # Train NB, LR, SVM — save artifacts
-│   │   ├── evaluate.py          # Evaluate on test set — save metrics
-│   │   └── registry.py          # Select and promote champion model
+│   │   ├── train.py                 # Train NB, LR, SVM — save artifacts
+│   │   ├── evaluate.py              # Evaluate on test set — save metrics
+│   │   └── registry.py              # Select and promote champion model
 │   ├── monitoring/
-│   │   └── data_drift.py        # Compare train vs test text statistics
+│   │   └── data_drift.py            # Compare train vs test text statistics
 │   ├── pipelines/
-│   │   ├── training_pipeline.py    # End-to-end training runner
-│   │   ├── evaluation_pipeline.py  # Standalone evaluation runner
-│   │   └── inference_pipeline.py   # Load model and predict
+│   │   ├── training_pipeline.py     # End-to-end training runner
+│   │   ├── evaluation_pipeline.py   # Standalone evaluation runner
+│   │   └── inference_pipeline.py    # Load model and predict
 │   └── api/
-│       └── main.py              # FastAPI REST API
+│       └── main.py                  # FastAPI REST API
 │
-├── app.py                       # Streamlit web application
+├── app.py                           # Streamlit web application
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -118,14 +98,15 @@ CUSTOMER_COMPLAINT_CLASSIFICATION/
 
 ---
 
-## Setup
-
+## Installation
 ```bash
 git clone https://github.com/wissemhammami/CUSTOMER-COMPLAINT-CLASSIFICATION
 cd CUSTOMER-COMPLAINT-CLASSIFICATION
-python -m venv env3
-env3\Scripts\activate        # Windows
-source env3/bin/activate     # Mac/Linux
+
+python -m venv env
+env\Scripts\activate        # Windows
+source env/bin/activate     # Mac/Linux
+
 pip install -r requirements.txt
 ```
 
@@ -136,33 +117,54 @@ data/raw/complaints_raw.csv
 
 ---
 
-## Run
+## How to Run
 
-### Full training pipeline
+**1 — Full training pipeline**
 ```bash
 python -m src.pipelines.training_pipeline
 ```
 Runs: ingest → validate → build features → train 3 models → promote champion
 
-### Evaluation
+**2 — Evaluation**
 ```bash
 python -m src.pipelines.evaluation_pipeline
 ```
 
-### FastAPI
+**3 — Launch the API**
 ```bash
 uvicorn src.api.main:app --reload
 ```
-Swagger docs available at `http://127.0.0.1:8000/docs`
+API docs available at `http://127.0.0.1:8000/docs`
 
-**Example request:**
+**4 — Launch the Streamlit app**
+```bash
+streamlit run app.py
+```
+App available at `http://localhost:8501`
+
+**5 — Data drift report**
+```bash
+python -m src.monitoring.data_drift
+```
+Saves report to `monitoring_reports/data_drift_report.csv`
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Check API status |
+| POST | `/predict` | Classify a single complaint |
+
+**Example request**
 ```bash
 curl -X POST http://127.0.0.1:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"text": "I was charged twice for the same transaction and my bank refuses to refund me."}'
 ```
 
-**Example response:**
+**Example response**
 ```json
 {
   "text": "I was charged twice for the same transaction and my bank refuses to refund me.",
@@ -171,32 +173,41 @@ curl -X POST http://127.0.0.1:8000/predict \
 }
 ```
 
-### Streamlit app
-```bash
-streamlit run app.py
+---
+
+## ML Pipeline
+```
+Raw Text
+  └── Ingestion              → Load CSV, keep text + label columns
+        └── Validation       → Remove duplicates, drop short texts
+              └── Cleaning   → Lowercase, remove punctuation, remove stopwords
+                    └── TF-IDF (50k features, unigrams + bigrams)
+                          └── Model comparison → NB / LR / LinearSVC
+                                └── Champion selection → Logistic Regression (F1: 0.8971)
 ```
 
-### Data drift report
-```bash
-python -m src.monitoring.data_drift
-```
-Saves report to `monitoring_reports/data_drift_report.csv`
+---
+
+## Key Insights
+
+- Logistic Regression outperformed LinearSVC — contrary to the common assumption that SVM wins on text classification
+- Money transfer is the hardest category to classify (F1: 0.83) due to overlap with banking complaints
+- Mortgage and Student loan are the easiest (F1: 0.95–0.96) — highly distinct vocabulary
+- Removing duplicates (28,720 rows) was critical — keeping them would have inflated metrics artificially
 
 ---
 
 ## Tech Stack
 
-| Tool | Purpose |
+| Category | Tools |
 |---|---|
-| Python | Core language |
-| scikit-learn | TF-IDF, model training, evaluation |
-| NLTK | Text preprocessing, stopwords |
-| FastAPI | REST API |
-| Streamlit | Web application |
-| Evidently | Data drift monitoring |
-| pandas / numpy | Data manipulation |
-| matplotlib / seaborn | Visualization |
-| joblib | Model serialization |
+| Language | Python |
+| ML | scikit-learn, NLTK |
+| API | FastAPI, Pydantic, Uvicorn |
+| Frontend | Streamlit |
+| Monitoring | Evidently |
+| Visualization | Matplotlib, Seaborn |
+| Serialization | joblib |
 
 ---
 
@@ -205,5 +216,3 @@ Saves report to `monitoring_reports/data_drift_report.csv`
 **Wissem Hammami**  
 Engineering Student — ESSAI, University of Carthage, Tunisia  
 [GitHub](https://github.com/wissemhammami)
-````
-
