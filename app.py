@@ -112,12 +112,13 @@ if classify:
                         </div>
                     </div>
                     <div>
-                        <div class="confidence-label">Confidence Score</div>
+                        <div class="confidence-label">Decision Score</div>
                         <div class="confidence-value">{score}</div>
                     </div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
+        st.caption("Reflects distance from the decision boundary, not a calibrated probability.")
 
         st.success("Classification complete.")
 
