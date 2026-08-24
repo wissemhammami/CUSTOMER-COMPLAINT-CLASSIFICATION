@@ -20,8 +20,8 @@ def get_best_artifact(artifacts_dir: str = 'models_artifacts') -> tuple:
             continue
         with open(metrics_path, 'r') as f:
             metrics = json.load(f)
-        f1 = metrics.get('weighted_f1', 0)
-        if f1 > best_f1:
+        f1 = round(metrics.get('weighted_f1', 0), 4)
+        if f1 > best_f1 or (f1 == best_f1 and (best_name is None or folder > best_name)):
             best_f1   = f1
             best_path = os.path.join(artifacts_dir, folder)
             best_name = folder

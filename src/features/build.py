@@ -2,15 +2,14 @@
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from src.features.transformers import TextCleaner
 import os
 
 
 def build_features(input_path: str, output_dir: str) -> None:
     """
     Load validated data, split into train/eval/test,
-    apply text cleaning and save to output directory.
-    TF-IDF is handled inside the model training pipeline.
+    split raw text and save it to the output directory.
+    Cleaning and TF-IDF are handled inside the persisted model pipeline.
     """
     df = pd.read_csv(input_path)
 
@@ -27,17 +26,11 @@ def build_features(input_path: str, output_dir: str) -> None:
 
     print(f"Train: {len(X_train)} | Eval: {len(X_eval)} | Test: {len(X_test)}")
 
-    # Apply text cleaning
-    cleaner = TextCleaner()
-    X_train_clean = pd.Series(cleaner.transform(X_train), name='clean_text')
-    X_eval_clean  = pd.Series(cleaner.transform(X_eval),  name='clean_text')
-    X_test_clean  = pd.Series(cleaner.transform(X_test),  name='clean_text')
-
     os.makedirs(output_dir, exist_ok=True)
 
-    X_train_clean.to_csv(f'{output_dir}/train_features.csv', index=False)
-    X_eval_clean.to_csv(f'{output_dir}/eval_features.csv',   index=False)
-    X_test_clean.to_csv(f'{output_dir}/test_features.csv',   index=False)
+    X_train.to_csv(f'{output_dir}/train_features.csv', index=False)
+    X_eval.to_csv(f'{output_dir}/eval_features.csv',   index=False)
+    X_test.to_csv(f'{output_dir}/test_features.csv',   index=False)
 
     y_train.to_csv(f'{output_dir}/y_train.csv', index=False)
     y_eval.to_csv(f'{output_dir}/y_eval.csv',   index=False)

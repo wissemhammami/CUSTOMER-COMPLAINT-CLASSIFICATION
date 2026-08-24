@@ -7,6 +7,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import f1_score, classification_report
+from src.features.transformers import TextCleaner
 import joblib
 import json
 import os
@@ -39,6 +40,7 @@ def train_and_evaluate(output_dir: str = 'models_artifacts') -> dict:
         print(f"Training {name}...")
 
         pipeline = Pipeline([
+            ('cleaner', TextCleaner()),
             ('tfidf', TfidfVectorizer(max_features=50000, ngram_range=(1, 2))),
             ('clf', model)
         ])
