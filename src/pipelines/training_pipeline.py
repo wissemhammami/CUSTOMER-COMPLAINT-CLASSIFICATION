@@ -4,7 +4,8 @@ from src.data.ingest import load_raw_data
 from src.data.validate import validate_data
 from src.features.build import build_features
 from src.models.train import train_and_evaluate
-from src.models.registry import promote_champion
+from src.models.registry import promote_champion, write_model_metadata
+from src.models.evaluate import evaluate_model
 
 
 def run_training_pipeline(raw_data_path: str = 'data/raw/complaints_raw.csv',
@@ -46,6 +47,20 @@ def run_training_pipeline(raw_data_path: str = 'data/raw/complaints_raw.csv',
     print("STEP 5 — Promote champion")
     print("=" * 50)
     promote_champion(artifacts_dir=artifacts_dir, champion_dir=champion_dir)
+
+    print("\n" + "=" * 50)
+    print("STEP 6 — Evaluate promoted champion")
+    print("=" * 50)
+    metrics = evaluate_model(
+        model_path=f'{champion_dir}/model.pkl',
+        output_dir=champion_dir,
+    )
+    write_model_metadata(
+        model_path=f'{champion_dir}/model.pkl',
+        champion_name=champion,
+        weighted_f1=metrics['weighted_f1_test'],
+        champion_dir=champion_dir,
+    )
 
     print("\n" + "=" * 50)
     print("TRAINING PIPELINE COMPLETE")

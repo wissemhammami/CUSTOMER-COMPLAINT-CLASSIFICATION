@@ -1,0 +1,13 @@
+split:
+  train: 0.70
+  eval: 0.15
+  test: 0.15
+
+cv:
+  n_splits: 3
+  shuffle: true
+  random_state: 42
+
+scoring: f1_weighted
+random_state: 42
+min_text_length: 50

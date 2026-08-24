@@ -3,6 +3,9 @@
 import os
 import json
 import shutil
+from datetime import datetime, timezone
+
+import joblib
 
 
 def get_best_artifact(artifacts_dir: str = 'models_artifacts') -> tuple:
@@ -43,9 +46,45 @@ def promote_champion(artifacts_dir: str = 'models_artifacts',
     shutil.copy(os.path.join(best_path, 'model.pkl'),
                 os.path.join(champion_dir, 'model.pkl'))
 
+    write_model_metadata(
+        model_path=os.path.join(champion_dir, 'model.pkl'),
+        champion_name=best_name,
+        weighted_f1=best_f1,
+        champion_dir=champion_dir,
+    )
+
     print(f"Champion: {best_name}")
     print(f"Weighted F1: {best_f1:.4f}")
     print(f"Model promoted to {champion_dir}/model.pkl")
+
+
+def write_model_metadata(model_path: str, champion_name: str,
+                         weighted_f1: float, champion_dir: str) -> None:
+    """Write metadata alongside the promoted model artifact."""
+    model = joblib.load(model_path)
+    classifier = model.named_steps['clf']
+    vectorizer = model.named_steps['tfidf']
+    model_type = {
+        'LogisticRegression': 'Logistic Regression',
+        'LinearSVC': 'Linear SVM',
+        'MultinomialNB': 'Multinomial Naive Bayes',
+    }.get(type(classifier).__name__, type(classifier).__name__)
+    metadata = {
+        'model_name': champion_name,
+        'model_type': model_type,
+        'promotion_timestamp': datetime.now(timezone.utc).isoformat(),
+        'training_date': datetime.now(timezone.utc).date().isoformat(),
+        'dataset': 'CFPB complaints',
+        'weighted_f1': round(weighted_f1, 4),
+        'pipeline_steps': list(model.named_steps),
+        'hyperparameters': {
+            'tfidf_max_features': vectorizer.max_features,
+            'tfidf_ngram_range': list(vectorizer.ngram_range),
+            **classifier.get_params(),
+        },
+    }
+    with open(os.path.join(champion_dir, 'model_metadata.json'), 'w') as f:
+        json.dump(metadata, f, indent=2)
 
 
 if __name__ == "__main__":

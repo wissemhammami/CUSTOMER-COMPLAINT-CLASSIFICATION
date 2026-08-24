@@ -3,6 +3,11 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import os
+from pathlib import Path
+import yaml
+
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 def build_features(input_path: str, output_dir: str) -> None:
@@ -15,13 +20,18 @@ def build_features(input_path: str, output_dir: str) -> None:
 
     X = df['text']
     y = df['label']
+    with open(ROOT_DIR / 'configs' / 'training.yaml') as f:
+        training_config = yaml.safe_load(f)
+    split = training_config['split']
+    random_state = training_config['random_state']
 
-    # Train / eval / test split (70 / 15 / 15)
     X_train, X_temp, y_train, y_temp = train_test_split(
-        X, y, test_size=0.30, random_state=42, stratify=y
+        X, y, test_size=split['eval'] + split['test'],
+        random_state=random_state, stratify=y
     )
     X_eval, X_test, y_eval, y_test = train_test_split(
-        X_temp, y_temp, test_size=0.50, random_state=42, stratify=y_temp
+        X_temp, y_temp, test_size=split['test'] / (split['eval'] + split['test']),
+        random_state=random_state, stratify=y_temp
     )
 
     print(f"Train: {len(X_train)} | Eval: {len(X_eval)} | Test: {len(X_test)}")

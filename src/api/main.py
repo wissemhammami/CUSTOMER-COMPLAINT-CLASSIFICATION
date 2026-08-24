@@ -3,7 +3,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 from src.pipelines.inference_pipeline import load_model
 
 
@@ -23,7 +23,14 @@ app = FastAPI(
 
 
 class ComplaintRequest(BaseModel):
-    text: str
+    text: str = Field(min_length=1, max_length=5000)
+
+    @field_validator('text')
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError('text must not be empty or whitespace')
+        return value
 
 
 class PredictionResponse(BaseModel):
@@ -39,9 +46,6 @@ def root():
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict_complaint(request: Request, complaint: ComplaintRequest):
-    if not complaint.text.strip():
-        raise HTTPException(status_code=400, detail="Text cannot be empty.")
-
     model = request.app.state.model
     prediction = model.predict([complaint.text])[0]
     confidence = max(model.decision_function([complaint.text])[0])

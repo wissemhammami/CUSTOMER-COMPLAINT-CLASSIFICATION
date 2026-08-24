@@ -47,8 +47,8 @@ so they can be routed and prioritized instantly.
 CUSTOMER_COMPLAINT_CLASSIFICATION/
 │
 ├── configs/
-│   ├── model.yaml                   # Model hyperparameters
-│   └── training.yaml                # Training configuration
+│   ├── model.yaml                   # Model and GridSearchCV configuration
+│   └── training.yaml                # Training and validation configuration
 │
 ├── data/
 │   ├── raw/                         # Raw CSV (gitignored)
@@ -58,6 +58,7 @@ CUSTOMER_COMPLAINT_CLASSIFICATION/
 │   └── latest/                      # Champion model served by API and Streamlit
 │       ├── model.pkl
 │       ├── metrics.json
+│       ├── model_metadata.json
 │       ├── classification_report.txt
 │       ├── confusion_matrix.png
 │       └── eval_predictions.csv
@@ -91,6 +92,10 @@ CUSTOMER_COMPLAINT_CLASSIFICATION/
 │       └── main.py                  # FastAPI REST API
 │
 ├── app.py                           # Streamlit web application
+├── tests/                            # Pytest unit and end-to-end tests
+│   ├── test_api.py
+│   ├── test_pipeline_e2e.py
+│   └── test_text_cleaner.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -185,6 +190,10 @@ Raw Text
                           └── Model comparison → NB / LR / LinearSVC
                                 └── Champion selection → Logistic Regression (F1: 0.8971)
 ```
+
+Hyperparameter tuning uses stratified `GridSearchCV` for Logistic Regression, Linear SVM, and Multinomial Naive Bayes.
+
+Configuration files are wired into `train.py`, `build.py`, and `validate.py` for model, split, CV, scoring, and validation settings.
 
 ---
 

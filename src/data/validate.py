@@ -1,6 +1,11 @@
 # src/data/validate.py
 
 import pandas as pd
+from pathlib import Path
+import yaml
+
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 def validate_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -23,9 +28,11 @@ def validate_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop_duplicates()
     print(f"Removed {before - len(df)} duplicates.")
 
-    # Remove very short texts
+    with open(ROOT_DIR / 'configs' / 'training.yaml') as f:
+        min_text_length = yaml.safe_load(f)['min_text_length']
+
     before = len(df)
-    df = df[df['text'].str.len() >= 50]
+    df = df[df['text'].str.len() >= min_text_length]
     print(f"Removed {before - len(df)} short texts.")
 
     # Reset index
