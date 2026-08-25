@@ -101,6 +101,8 @@ CUSTOMER_COMPLAINT_CLASSIFICATION/
 └── .gitignore
 ```
 
+Notebooks reflect the corrected pipeline (cleaning inside the model pipeline, GridSearchCV tuning) — see `src/` for the production implementation.
+
 ---
 
 ## Installation
